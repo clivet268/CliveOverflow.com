@@ -1,174 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CliveOverflow - Server Status</title>
-    <!-- Automatic Theme Persistence Fix (FOUC Fix) -->
-    <script>
-        (function() {
-            if (localStorage.getItem('theme') === 'light') {
-                document.documentElement.classList.add('light-mode');
-            }
-        })();
-    </script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CliveOverflow Hub</title>
+  <link rel="stylesheet" href="style1.css">
 </head>
 <body>
-    <div class="main-container">
-        <div class="theme-switch-wrapper">
-            <button onclick="toggleTheme()" class="theme-btn">Toggle Theme</button>
-        </div>
-
-        <header class="site-header">
-            <h1>CliveOverflow</h1>
-            <p style="color: var(--text-muted); font-size: 0.95rem;">Minecraft Server & Status Dashboard</p>
-        </header>
-
-        {% if success %}
-            <div class="success-banner">Message sent successfully!</div>
-        {% endif %}
-        {% if error_message %}
-            <div class="error-banner">{{ error_message }}</div>
-        {% endif %}
-
-        <div class="card">
-            <h2>Server Status</h2>
-            <div class="status-grid">
-                <div class="status-item">
-                    <span class="label">Status:</span>
-                    <span class="value" id="status-text" style="font-weight: bold;">Checking...</span>
-                </div>
-                <div class="status-item">
-                    <span class="label">Uptime / Latency:</span>
-                    <span class="value" id="uptime-text" style="font-family: monospace;">--:--:-- (<span id="latency-display">-- ms</span>)</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Connect to Server</h2>
-            <div class="server-list">
-                <div class="server-entry">
-                    <div class="server-info">
-                        <h3>Java Edition</h3>
-                        <span class="server-ip" id="java-ip">cliveoverflow.com:36000</span>
-                    </div>
-                    <button onclick="copyIP('java-ip')" class="copy-btn">Copy</button>
-                </div>
-
-                <div class="server-entry">
-                    <div class="server-info">
-                        <h3>Bedrock Edition</h3>
-                        <span class="server-ip" id="bedrock-ip">cliveoverflow.com</span>
-                    </div>
-                    <button onclick="copyIP('bedrock-ip')" class="copy-btn">Copy</button>
-                </div>
-
-                <div class="server-entry">
-                    <div class="server-info">
-                        <h3>Backup IP (Java)</h3>
-                        <span class="server-ip" id="backup-ip">cliveoverflow.servergame.com:36000</span>
-                    </div>
-                    <button onclick="copyIP('backup-ip')" class="copy-btn">Copy</button>
-                </div>
-
-                <div class="server-entry">
-                    <div class="server-info">
-                        <h3>Eaglercraft Proxy</h3>
-                        <span class="server-ip" id="eaglercraft-ip">wss://cliveoverflow.com:30065</span>
-                    </div>
-                    <button onclick="copyIP('eaglercraft-ip')" class="copy-btn">Copy</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Join Our Community</h2>
-            <div class="discord-widget-container">
-                <div class="discord-widget">
-                    <div class="discord-header">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color: #5865F2;">
-                            <path d="M20.317 4.369a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.211.375-.444.864-.607 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.028C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.975 14.975 0 0 0 1.293-2.1.076.076 0 0 0-.042-.106 13.107 13.107 0 0 1-1.872-.89.077.077 0 0 1-.008-.128 10.713 10.713 0 0 0 .372-.294.075.075 0 0 1 .078-.01c3.927 1.793 8.18 1.793 12.062 0a.075.075 0 0 1 .079.009c.12.098.246.198.373.294a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.891.076.076 0 0 0-.041.107c.36.698.772 1.362 1.293 2.1a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.003-3.03.077.077 0 0 0 .032-.055c.5-4.467.852-8.848.432-13.173a.06.06 0 0 0-.031-.028zM8.02 15.331c-1.183 0-2.157-1.084-2.157-2.413 0-1.328.952-2.413 2.157-2.413 1.21 0 2.176 1.095 2.157 2.413 0 1.329-.952 2.413-2.157 2.413zm7.975 0c-1.183 0-2.157-1.084-2.157-2.413 0-1.328.952-2.413 2.157-2.413 1.21 0 2.176 1.095 2.157 2.413 0 1.329-.946 2.413-2.157 2.413z"/>
-                        </svg>
-                        <h3>Discord Server</h3>
-                    </div>
-                    <p class="discord-info">Join our Discord community to chat with other players!</p>
-                    <a href="https://discord.gg/b37wSwKMvs" target="_blank" class="discord-btn">Join Discord</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Contact Administration</h2>
-            <form method="POST">
-                <div class="form-group">
-                    <label for="subject">Subject</label>
-                    <input type="text" id="subject" name="subject" placeholder="Enter subject" required>
-                </div>
-                <div class="form-group">
-                    <label for="message">Message</label>
-                    <textarea id="message" name="message" placeholder="Type your message here..." rows="3" required style="resize: vertical;"></textarea>
-                </div>
-                <button type="submit" class="submit-btn">Send to Discord</button>
-            </form>
-        </div>
-
-        <div class="site-footer">
-            <a href="/login" class="admin-link">Admin Panel Login</a>
-        </div>
+  <div class="main">
+    <div class="topbar">
+      <ul class="toplinks leftlinks">
+        <li><a href="https://discord.com/invite/QEYvf6cP6d">DISCORD</a></li>
+        <li><a href="#news">NEWS</a></li>
+        <li><a href="#contact">BUILDS</a></li>
+        <li><a href="#about">GUIDE</a></li>
+      </ul>
+      <div class="title">CLIVEOVERFLOW.COM</div>
+      <ul class="toplinks rightlinks">
+        <li><a href="#vote">VOTE</a></li>
+        <li><a href="#news">DONATE</a></li>
+        <li><a href="#builds">PLACE</a></li>
+        <li><a href="#about">PLACE</a></li>
+      </ul>
     </div>
-
-    <script>
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-mode');
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const currentTheme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
-            localStorage.setItem('theme', currentTheme);
-        }
-
-        function copyIP(elementId) {
-            const ipText = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(ipText).then(() => {
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = 'Copied!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                }, 2000);
-            }).catch(err => {
-                alert('Failed to copy: ' + err);
-            });
-        }
-
-        async function updateStatus() {
-            try {
-                const res = await fetch('/api/status');
-                const data = await res.json();
-                
-                const statusEl = document.getElementById('status-text');
-                const latencyEl = document.getElementById('latency-display');
-
-                if (data.status === 'online') {
-                    statusEl.textContent = "ONLINE";
-                    statusEl.style.color = "var(--success-text)";
-                    latencyEl.textContent = data.latency + " ms";
-                } else {
-                    statusEl.textContent = "OFFLINE";
-                    statusEl.style.color = "var(--error-text)";
-                    latencyEl.textContent = "Timeout";
-                }
-                document.getElementById('uptime-text').firstChild.textContent = data.uptime + " ";
-            } catch (err) {
-                console.error("Failed to fetch status", err);
-            }
-        }
-
-        setInterval(updateStatus, 5000);
-        updateStatus();
-    </script>
+    <div class="grid-container">
+      <div class="side sideleft">
+        Latest News:
+        <object class="news" data="news.txt" type="text/plain" color="#E7CA94" style="font-family: 'AsusRog-Regular', sans-serif;"></object>
+      </div>
+      <div class="center">
+        <div class="page1">
+          <div class ="carousel"></div>
+        </div>
+        <div class="page2">
+          tstefeefeefef
+        </div>
+        <div class="page3 vote-container" id="vote">
+          <ul class="votelinks">
+            <li>
+              <img src="https://minecraft-server-list.com/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minecraft-server-list.com/server/504648/vote/">
+                minecraft-server-list.com
+              </a>
+            </li>
+            <li>
+              <img src="https://minecraft-serverlist.com/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minecraft-serverlist.com/server/1169/vote">
+                minecraft-serverlist.com
+              </a>
+            </li>
+            <li>
+              <img src="https://minecraftservers.org/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minecraftservers.org/server/663047">
+                minecraftservers.org
+              </a>
+            </li>
+            <li>
+              <img src="https://minestatus.net/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minestatus.net/server/vote/cliveoverflow.com">
+                minestatus.net
+              </a>
+            </li>
+            <li>
+              <img src="https://minecraft-mp.com/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minecraft-mp.com/server-s332527/vote">
+                minecraft-mp.com
+              </a>
+            </li>
+            <li>
+              <img src="https://minecraft-statistic.net/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minecraft-statistic.net/en/server/cliveoverflow/top/">
+                minecraft-statistic.net
+              </a>
+            </li>
+            </li>
+            <li>
+              <img src="https://www.minecraftiplist.com/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://www.minecraftiplist.com/server/TheWorld1.20.5SemiVanillaNearAnarchy-34607/vote">
+                www.minecraftiplist.com
+              </a>
+            </li>
+            </li>
+            <li>
+              <img src="https://minecraft.menu/CSS/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minecraft.menu/server-cliveoverflow.6571/vote">
+                minecraft.menu
+              </a>
+            </li>
+            </li>
+            <li>
+              <img src="https://www.planetminecraft.com/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://www.planetminecraft.com/server/the-world-6289526/vote/">
+                www.planetminecraft.com
+              </a>
+            </li>
+            </li>
+            <li>
+              <img src="https://minelist.net/static/favicon/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minelist.net/vote/4531">
+                minelist.net
+              </a>
+            </li>
+            </li>
+            <li>
+              <img src="https://minecraft.buzz/favicon.ico" alt="Server Icon" width="64" height="64">
+              <a href="https://minecraft.buzz/vote/cliveoverflow">
+                minecraft.buzz
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="side sideright">
+      </div>
+    </div>
+    <div class="bg-animation">
+      <div id='stars'></div>
+      <div id='stars2'></div>
+      <div id='stars3'></div>
+      <div id='stars4'></div>
+    </div><!-- / STAR ANIMATION -->
+  </div>
 </body>
 </html>
