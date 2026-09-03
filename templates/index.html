@@ -27,21 +27,259 @@
     </div>
     <div class="grid-container">
       <div class="side sideleft">
-        Latest News:
-        <object class="news" data="news.txt" type="text/plain" color="#E7CA94" style="font-family: 'AsusRog-Regular', sans-serif;"></object>
+		<div class="newscontainer">
+          Latest News:
+        </div>
+		
+        <div id="news-box" class="news">
+            Loading news...
+        </div>
+		<!-- TODO -->
+        <script>
+            fetch('news.txt')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('news-box').textContent = data;
+                })
+                .catch(() => {
+                    document.getElementById('news-box').textContent = "Could not load news feed.";
+                });
+        </script>
+
+        <!--<object class="news" data="news.txt" type="text/plain" color="#E7CA94" style="background-color: transparent; font-family: 'AsusRog-Regular', sans-serif;"></object> -->
       </div>
       <div class="center">
         <div class="page1">
-          <div class ="carousel"></div>
-			<!-- 2. The physical element where ReactDOM mounts your app -->
-			<div id="app-root"></div>
-			
+          <div class ="carousel">
+            <!--<img src="/underconstruction.png" alt="Under Construction">-->
+			<div class="carousel-scene" id="scene">
+				<div class="carousel-container" id="carousel">
+					<!-- TODO, make alt text not selectable, its annoying -->
+					<div class="carousel-item">
+						<img src="placeholderservercard_1.png" alt="cliveoverflow.com">
+						<div class="scene-container">	
+							<div class="warped-text">cliveoverflow.com</div>
+							<div class="status-item">
+								<span class="label">Uptime / Latency:</span>
+								<span class="value" id="uptime-text" style="font-family: monospace;">--:--:-- (<span id="latency-display">-- ms</span>)</span>
+							</div>
+						</div>
+					</div>
+					<div class="carousel-item">
+						<img src="placeholderservercard.png" alt="cliveoverflow.com">
+					</div>
+					<div class="carousel-item">
+						<img src="placeholderservercard.png" alt="cliveoverflow.com">
+					</div>
+					<div class="carousel-item">
+						<img src="placeholderservercard.png" alt="cliveoverflow.com">
+					</div>
+					<div class="carousel-item">
+						<img src="placeholderservercard.png" alt="cliveoverflow.com">
+					</div>
+				</div>
+			</div>
 			<script>
-			//carousel
+				const scene = document.getElementById('scene');
+				const carousel = document.getElementById('carousel');
+				const items = document.querySelectorAll('.carousel-item');
+				
+				const count = items.length;
+				const radius = 350; // Radius of the 3D circular path
+				let theta = 360 / count;
+				
+				let currentAngle = 0;
+				let isDragging = false;
+				let startX = 0;
+				let dragAngle = 0;
+				
+				// Variables for the ultra-smooth physics engine
+				let animationFrameId = null;
+				let targetAngle = 0; // Where the carousel wants to land
+				const easingFactor = 0.12; // lower = smoother, dang his voice is so smoothing
+				
+				// Throttle flag for rAF batching
+				let updateScheduled = false;
+				
+				function updateCarouselLayout() {
+					items.forEach((item, index) => {
+						/*
+						//Kinda neat to give something like a ghosting shaking effect, would need heavy alteration
+						const itemAngle = index * theta;
+						let totalAngle = currentAngle + itemAngle;
+						let repeat = 1; 
+						if (Math.sin(currentAngle + itemAngle) < 0){
+							repeat = -1;
+						}
+						totalAngle = totalAngle * repeat;
+						*/
+						const mod = (n, m) => ((n % m) + m) % m;
+
+						let itemAngle = index * theta;
+						let totalAngle = currentAngle + itemAngle;
+						totalAngle = ((totalAngle + 360) % 720 + 720) % 720 - 360;
+						if(totalAngle > 120 || totalAngle < -120 ){
+							itemAngle =  -(count-index) * theta;
+							totalAngle = currentAngle + itemAngle;
+						}
+						
+						totalAngle = ((totalAngle + 360) % 720 + 720) % 720 - 360;
+						//totalAngle = ((totalAngle + 360) % 720 + 720) % 720 - 360;
+
+						//totalAngle = Math.sign(totalAngle) * ((Math.abs(totalAngle) + 360 % 720) - 360);
+						//console.log("__")
+						//console.log(currentAngle);
+						//console.log(totalAngle);
+						
+						/*
+						if(totalAngle > 120 || totalAngle < -120 ){
+							item.style.display = 'none'; // invisible out of view, and dont waste math
+							return;
+						}
+						item.style.display = 'block'; // visible if in view
+						*/
+						// Convert degrees to radians for positioning
+						const rad = (totalAngle * Math.PI) / 180;
+						const x = rad * radius;
+						const z = Math.cos(rad) * radius - radius; // shift depth so front is near 0
+				
+						/*rotateY(${totalAngle}deg)*/
+						item.style.transform = `translateX(${x}px) translateZ(${z}px)`;
+				
+						// Calculate distance from center/front view to assign active class
+						let normalized = (totalAngle % 360 + 360) % 360;
+						if (normalized > 180) normalized -= 360;
+				
+						// Dynamically update z-index layer based on closeness to front view
+						item.style.zIndex = Math.round(z + radius);
+				
+						if (Math.abs(normalized) < theta / 2) {
+							item.classList.add('active');
+						} else {
+							item.classList.remove('active');
+						}
+					});
+				}
+				
+				// Drag/Touch Handlers
+				function dragStart(e) {
+					isDragging = true;
+					cancelAnimationFrame(animationFrameId);
+					
+					startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+					dragAngle = currentAngle;
+				}
+				
+				function dragMove(e) {
+					if (!isDragging) return;
+					const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+					const deltaX = currentX - startX;
+					
+					currentAngle = dragAngle + deltaX * 0.25;
+					
+					/*
+					currentAnglesign = Math.sign(currentAngle);
+					currentAngle = (Math.abs(currentAngle) + 360 % 360) - 360;
+					if (Math.abs(currentAngle) > 360) {
+						currentAngle = currentAngle * -1;
+					}
+					*/
+					
+					//updateCarouselLayout();
+					scheduleLayoutUpdate();
+				}
+				
+				function dragEnd() {
+					if (!isDragging) return;
+					isDragging = false;
+					
+					// snap to nearest theta interval
+					targetAngle = Math.round(currentAngle / theta) * theta;
+					startSmoothSnap();
+				}
+				
+				function startSmoothSnap() {
+					if (animationFrameId) cancelAnimationFrame(animationFrameId);
+					// Avoid starting if already at target
+					if (Math.abs(targetAngle - currentAngle) < 0.01) {
+						currentAngle = targetAngle;
+						updateCarouselLayout();
+						return;
+					}
+					animationFrameId = requestAnimationFrame(smoothAnimate);
+				}
+				
+				function smoothAnimate() {
+					if (isDragging) return;
+					
+					let angleDifference = targetAngle - currentAngle;
+					
+					// ease back to propper position
+					currentAngle += angleDifference * easingFactor;
+					updateCarouselLayout();
+					
+					// snap at finish
+					if (Math.abs(angleDifference) > 0.01) {
+						animationFrameId = requestAnimationFrame(smoothAnimate);
+					} else {
+						currentAngle = targetAngle;
+						updateCarouselLayout();
+					}
+				}	
+				
+				function scheduleLayoutUpdate() {
+					if (!updateScheduled) {
+						updateScheduled = true;
+						requestAnimationFrame(() => {
+						updateCarouselLayout();
+						updateScheduled = false;
+						});
+					}
+				}
+				// rotate carousel arrows
+				function handleKeyDown(e) {
+					// Ignore if user is typing in an input/textarea
+					if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+				
+					// Only listen to left/right arrow keys
+					if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+						e.preventDefault(); // Stop page from scrolling
+				
+						// 1. Find which item is currently snapped to the front
+						//    (Math.round(currentAngle / theta) * theta gives us the current snap point)
+						let currentSnap = Math.round(currentAngle / theta) * theta;
+				
+						// 2. Adjust the target by one step (theta) in the chosen direction
+						if (e.key === 'ArrowRight') {
+							targetAngle = currentSnap - theta; // Move to the NEXT item
+						} else if (e.key === 'ArrowLeft') {
+							targetAngle = currentSnap + theta; // Move to the PREVIOUS item
+						}
+				
+						startSmoothSnap();
+					}
+				}
+				
+				// key rotate carousel
+				document.addEventListener('keydown', handleKeyDown);
+				
+				// drag carousel
+				scene.addEventListener('mousedown', dragStart);
+				window.addEventListener('mousemove', dragMove);
+				window.addEventListener('mouseup', dragEnd);
+				
+				scene.addEventListener('touchstart', dragStart);
+				window.addEventListener('touchmove', dragMove);
+				window.addEventListener('touchend', dragEnd);
+				
+				// Initial setup call
+				updateCarouselLayout();
+
 			</script>
+		  </div>
         </div>
         <div class="page2">
-          tstefeefeefef
+          <a href="https://minecraft-server-list.com/server/504648/"><img src="https://minecraft-server-list.com/server/logo/504648.png" alt="Minecraft Server CliveOverflow SMP"  /></a>
         </div>
         <div class="page3 vote-container" id="vote">
           <ul class="votelinks">
@@ -81,13 +319,11 @@
                 minecraft-statistic.net
               </a>
             </li>
-            </li>
             <li>
               <img src="https://www.minecraftiplist.com/favicon.ico" alt="Server Icon" width="64" height="64">
               <a href="https://www.minecraftiplist.com/server/TheWorld1.20.5SemiVanillaNearAnarchy-34607/vote">
                 www.minecraftiplist.com
               </a>
-            </li>
             </li>
             <li>
               <img src="https://minecraft.menu/CSS/favicon.ico" alt="Server Icon" width="64" height="64">
@@ -95,20 +331,17 @@
                 minecraft.menu
               </a>
             </li>
-            </li>
             <li>
               <img src="https://www.planetminecraft.com/favicon.ico" alt="Server Icon" width="64" height="64">
               <a href="https://www.planetminecraft.com/server/the-world-6289526/vote/">
                 www.planetminecraft.com
               </a>
             </li>
-            </li>
             <li>
               <img src="https://minelist.net/static/favicon/favicon.ico" alt="Server Icon" width="64" height="64">
               <a href="https://minelist.net/vote/4531">
                 minelist.net
               </a>
-            </li>
             </li>
             <li>
               <img src="https://minecraft.buzz/favicon.ico" alt="Server Icon" width="64" height="64">

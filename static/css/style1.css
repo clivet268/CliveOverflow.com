@@ -24,8 +24,10 @@
     --prussian-blue: #090821;
     --title-stuff: var(--brown-bark);
     /*black is kinda cool for this too, will need some tweaking or the shadown and whatnot*/
-    --title-text: var(--lemon-chiffon);
-    --star: var(--lemon-chiffon);
+    --title-text: var(--apricot-cream);
+    /*--star: var(--lemon-chiffon);*/
+	--star: color-mix(in srgb, var(--lemon-chiffon) 40%, transparent);
+	
 
     
     /*number vars*/
@@ -58,7 +60,6 @@ body {
   overflow-x:hidden;
   background-size: contain;
   background-image: url('placehoder.jpg');
-
 }
 
 /* Modern browsers — Chrome 121+, Edge 121+, Firefox, Safari 18.2+ */
@@ -125,8 +126,9 @@ body {
 .title {
   background: none;
   text-decoration: none;
+  /* TODO, these 2 lines have become the standard fancy text, so could make its own class*/
   color: var(--title-text);
-  text-shadow: 4px 4px var(--brown-bark);
+  text-shadow: 4px 4px var(--title-stuff);
   display: inline;
   font-size: 36px;
   padding-left: 8px;
@@ -199,7 +201,7 @@ body {
 
 .grid-container {
   display: grid;
-  grid-template-columns: 15% 70% 15%;
+  grid-template-columns: 17% 66% 17%;
   width: 100%;
   height: var(--page-size);
 }
@@ -226,11 +228,11 @@ body {
       rgba(0, 0, 0, 0)
     ) 1 50%;
 }
-}
+
 
 /* Styling for the center column */
 .center {
-  padding: 24px;
+  /*padding: 24px;*/
   background-color: transparent;
 }
 
@@ -263,17 +265,39 @@ body {
   width: min(100vw, 100%);
 }
 
+.container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.items-container {
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.item {
+  height: 200px;
+  width: 200px;
+  border-radius: 5px;
+  background-color: lightgrey;
+}
+
+
+
+.newscontainer{
+  font-size: 24px;
+}
+
 .news {
   height: 100%;
   font-family: 'AsusRog-Regular';
+  background-color: transparent;
+  color: var(--lemon-chiffon);
+  font-size: 12px;
+  white-space: pre-wrap;
 }
-
-.news embed{
-  height: 100%;
-  font-family: 'AsusRog-Regular';
-}
-
-
 
 .votelinks {
   border: 1px solid black;
@@ -317,10 +341,10 @@ body {
 .votelinks img {
     background: none;
     text-decoration: none;
-    shadow: 2px 2px var(--title-stuff);
+    text-shadow: 2px 2px var(--title-stuff);
     padding: 8px;
-    width: 32;
-    height: 32;
+    width: 32px;
+    height: 32px;
 }
 
 .votelinks a {
@@ -340,7 +364,7 @@ body {
 
 
 
-
+/* modified original: https://codepen.io/riley-pearce/pen/OJWPjZM */
 
 .bg-animation {
     position: relative;
@@ -467,3 +491,122 @@ body {
   }
 }
 
+
+/*carousel code*/
+
+.carousel-scene {
+    perspective: 1000px;
+    width: 100%;
+    height: 800px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+	overflow-x: hidden;
+}
+
+.carousel-scene:active {
+    cursor: grabbing;
+}
+
+.carousel-container {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    transform-style: preserve-3d;
+	will-change: transform;
+}
+
+.carousel-item {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: transparent;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: filter 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE10+ */
+    user-select: none;         /* Standard syntax */
+    border-radius: 10%;
+    backface-visibility: hidden;    Skips rendering rear faces
+	-webkit-backface-visibility: hidden; 
+	will-change: transform;        /* Hints GPU acceleration */
+}
+
+.carousel-item img {
+	width: 100%;
+	height: 100%;
+    pointer-events: none;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE10+ */
+    user-select: none;         /* Standard syntax */
+    will-change: transform, z-index;
+	image-rendering: auto;
+}
+
+/* Shadow/Dim overlay for background items */
+.carousel-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+/* Active/Main item highlight (front-most) */
+.carousel-item.active::after {
+    opacity: 0;
+}
+
+
+/* The 3D container setup */
+.scene-container {
+    position: absolute;
+    /* Force bounds by pinning all 4 sides */
+    top: 60%;
+    bottom: 0;
+    left: 40%;
+    right: 0;
+	max-width: 800px;
+	/* Adds 3D depth to anything transformed inside it */
+	/*perspective: 600px; */
+	display: grid;
+	grid-template-rows: 50% 50%;
+	justify-content: center;
+	align-items: center;
+}
+
+/* Styling the warped text */
+.warped-text {
+  font-family: 'Impact', 'Arial Black', sans-serif;
+  font-size: 25px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  fill: #00ffcc;
+  color: var(--title-text);
+  left: 5%;
+    position: relative;
+  
+  text-shadow: 3px 3px 0px var(--title-stuff);
+  
+  /* Creates a physical 3D layered shadow effect trailing away */
+  /*
+  filter: drop-shadow(3px 3px 0px var(--sandy-clay)), 
+          drop-shadow(6px 6px 0px var(--brown-bark)),
+          drop-shadow(15px 15px 20px var(--dark-coffee));
+		  
+		  *//*rgba(0,0,0,0.7));*/
+		  
+  transform: rotateZ(-9deg) rotateX(15deg) rotateY(-15deg);
+}
